@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brainsplain It To Me</title>
+  <style>
+    /* Base page styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      background-color: #f5f5dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 40px;
+      position: relative;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header container with gradient animation */
+    #header-container {
+      color: white;
+      padding: 30px 50px;
+      text-align: center;
+      margin-bottom: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      width: 80%;
+      max-width: 700px;
+      box-sizing: border-box;
+      background-image: linear-gradient(to right,
+        #ff7f7f, #ffbf7f, #ffff7f,
+        #7fff7f, #7fbfff, #7f7fff);
+      transition: background-image 3s ease;
+    }
+
+    #header-container h1 { margin: 0; }
+
+    /* Decorative icons in header */
+    #header-container::before, #header-container::after {
+      content: '';
+      position: absolute;
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.7;
+    }
+    #header-container::before {
+      top: -20px; left: -20px;
+      width: 60px; height: 60px;
+      background-image: url('nueron.icon.png');
+    }
+    #header-container::after {
+      bottom: -20px; right: -20px;
+      width: 70px; height: 70px;
+      background-image: url('neuron-image2.png');
+    }
+
+    /* Episode list container */
+    #episode-list {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      width: 80%; max-width: 700px;
+      margin-bottom: 30px;
+      box-sizing: border-box;
+    }
+
+    #episode-list h2 {
+      margin-top: 0;
+      color: #8a2be2;
+      text-align: center;
+    }
+
+    /* Individual episode items */
+    .episode-item {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+    }
+    .episode-item:last-child { border-bottom: none; }
+    .episode-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .episode-description {
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    /* Buttons */
+    .play-button, .transcript-button {
+      padding: 10px 20px;
+      background-color: #8a2be2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease;
+      align-self: flex-start;
+    }
+    .play-button:hover, .transcript-button:hover {
+      background-color: #9400d3;
+    }
+
+    /* Progress bar styling */
+    .audio-progress {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* About sections */
+    .about-section {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      width: 80%; max-width: 700px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .about-section h2 {
+      color: #8a2be2;
+      margin-bottom: 10px;
+      text-align: center;
+      position: relative;
+      padding-top: 30px;
+    }
+    .about-section h2::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 40px; height: 40px;
+      background-image: url('nueron.icon.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+    }
+    .about-section p { color: #555; line-height: 1.6; }
+
+    /* Neuro-fact boxes */
+    .neuro-fact {
+      position: absolute;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 200px;
+      font-size: 0.9em;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      transform: translateY(20px);
+    }
+    .neuro-fact.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Fact positions */
+    .fact-1 { top: 15%; left: 5%; }
+    .fact-2 { top: 40%; right: 5%; }
+    .fact-3 { top: 65%; left: 10%; }
+    .fact-4 { top: 79%; right: 10%; }
+    .episode-fact-1 { top: 22%; left: 5%; }
+    .episode-fact-2 { top: 31%; right: 10%; }
+    .episode-fact-3 { top: 45%; left: 10%; }
+    .episode-fact-4 { top: 54%; right: 5%; }
+
+    /* Floating images */
+    .floating-image {
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      transform: scale(0.5) translateY(50px);
+      z-index: -1;
+    }
+    .floating-image.visible {
+      opacity: 0.3;
+      transform: scale(1) translateY(0);
+    }
+    .floating-neuron1 { top: 20%; left: 15%; width: 50px; }
+    .floating-synapse1 { top: 50%; right: 10%; width: 70px; }
+    .floating-brainbit1 { bottom: 20%; left: 20%; width: 60px; }
+    .floating-neuron2 { bottom: 40%; right: 15%; width: 40px; }
+  </style>
+</head>
+<body>
+  <div id="header-container">
+    <h1><i>Brainsplain It To Me</i> by Asher Seibel and Ava Modarresi</h1>
+  </div>
+
+  <section id="episode-list">
+    <h2>Podcast Episodes</h2>
+    <ul>
+      <li class="episode-item">
+        <h3 class="episode-title">Episode 1: Liking, Wanting, and Addiction</h3>
+        <p class="episode-description">We break down why we keep chasing things we don’t even like anymore—exploring the mesolimbic dopamine system, classical conditioning, and incentive salience in habit formation and addiction.</p>
+        <button class="play-button" data-audio="episode1.mp3">Play</button>
+        <audio data-episode="1">
+          <source src="episode1 Liking Wanting and Addiction.mp3" type="audio/mpeg">
+        </audio>
+        <button class="transcript-button" data-transcript="Episode 1 Liking Wanting and Addiction.txt">Transcript</button>
+      </li>
+      <li class="episode-item">
+        <h3 class="episode-title">Episode 2: How Memory Works</h3>
+        <p class="episode-description">Why do we forget where we put our coffee but remember cringy middle school moments? We dive into encoding, consolidation, retrieval, Patient HM, and how different memory systems shape what we remember (or don’t).</p>
+        <button class="play-button" data-audio="episode2.mp3">Play</button>
+        <audio data-episode="2">
+          <source src="Episode 2 How Memory Works.mp3" type="audio/mpeg">
+        </audio>
+        <button class="transcript-button" data-transcript="Episode 2 How Memory Works.txt">Transcript</button>
+      </li>
+      <li class="episode-item">
+        <h3 class="episode-title">Episode 3: Post-Study Cravings</h3>
+        <p class="episode-description">Late-night food binges after studying aren’t just about willpower—they’re tied to ghrelin, the hypothalamus, dopamine, and how your brain prioritizes survival after stress.</p>
+        <button class="play-button" data-audio="episode3.mp3">Play</button>
+        <audio data-episode="3">
+          <source src="Episode 3 Post-Study Cravings.mp3" type="audio/mpeg">
+        </audio>
+        <button class="transcript-button" data-transcript="Episode 3 Post-Study Cravings.txt">Transcript</button>
+      </li>
+      <li class="episode-item">
+        <h3 class="episode-title">Episode 4: Oxytocin Highs</h3>
+        <p class="episode-description">Petting a puppy? Thank oxytocin. We explain how this “love hormone” calms the brain, lowers cortisol, boosts reward pathways, and helps us feel safer after stress.</p>
+        <button class="play-button" data-audio="Episode 4 Oxytocin Highs.mp3">Play</button>
+        <audio data-episode="4">
+          <source src="Episode 4 Oxytocin Highs.mp3" type="audio/mpeg">
+        </audio>
+        <button class="transcript-button" data-transcript="Episode 4 Oxytocin Highs.txt">Transcript</button>
+      </li>
+    </ul>
+  </section>
+
+  <section class="about-section">
+    <h2>About Asher Seibel</h2>
+    <p>Asher Seibel is a Behavioral Neuroscience major with a minor in Religion, originally from Seattle, Washington. Driven by a passion to understand the intricacies of the brain, Asher aims to contribute to the healthcare field. Outside of his studies, you can find Asher on the tennis court or volunteering as an EMT with Emory Emergency Medical Services (EEMS).</p>
+  </section>
+
+  <section class="about-section">
+    <h2>About Ava Modarresi</h2>
+    <p>Ava Modarresi is a Behavioral Neuroscience major hailing from Syosset, Long Island, New York. She is deeply curious about interpersonal connections and the neural basis of our thoughts and behaviors. In her free time, Ava enjoys bowling. An interesting tidbit about Ava is that she has been a patient of Emory Emergency Medical Services (EEMS) on three separate occasions!</p>
+  </section>
+
+  <section id="about-section" style="text-align: center; margin-bottom: 40px;">
+    <h2>About Brainsplain It To Me</h2>
+    <p><i>Brainsplain It To Me</i> is a podcast by two Emory University students (Asher and Ava) from NBB 302: Behavioral Neuroscience. We take real-life stories from our time as students, and break it down to unpack the neuroscience behind the chaos of college life. We’re here to make complex brain science feel human, relatable, and occasionally hilarious.</p>
+  </section>
+
+  <!-- Neuro fact boxes -->
+  <div class="neuro-fact fact-1">Did you know? The average human brain weighs about 3 pounds.</div>
+  <div class="neuro-fact fact-2">Fun Fact: Neurons can transmit signals at speeds of up to 268 miles per hour!</div>
+  <div class="neuro-fact fact-3">Cool Science: The hippocampus, a key area for memory, is one of the few brain regions that can generate new neurons in adulthood (neurogenesis).</div>
+  <div class="neuro-fact fact-4">Brain Buzz: The frontal lobe, responsible for planning and decision-making, continues to develop until your early to mid-20s.</div>
+  <!-- Episode-specific facts -->
+  <div class="neuro-fact episode-fact-1" data-episode="1">Brain Link (Episode 1): Dopamine, a key neurotransmitter in the "liking" and "wanting" circuits, is also involved in motivation, reward, and learning.</div>
+  <div class="neuro-fact episode-fact-2" data-episode="2">Memory Note (Episode 2): The hippocampus plays a crucial role in forming new episodic memories – memories of events you've experienced.</div>
+  <div class="neuro-fact episode-fact-3" data-episode="3">Craving Insight (Episode 3): Ghrelin, often called the "hunger hormone," is produced in the stomach and signals to the hypothalamus to increase appetite.</div>
+  <div class="neuro-fact episode-fact-4" data-episode="4">Love Hormone Fact (Episode 4): Oxytocin is released during social bonding activities, such as hugging, which can contribute to feelings of trust and calmness.</div>
+
+  <!-- Floating images -->
+  <img src="nueron.icon.png" alt="Neuron Icon" class="floating-image floating-neuron1">
+  <img src="neuron-image2.png" alt="Synapse Illustration" class="floating-image floating-synapse1">
+  <img src="brain-scan.png" alt="Brain Scan Bit" class="floating-image floating-brainbit1">
+  <img src="nueron.icon.png" alt="Another Neuron Icon" class="floating-image floating-neuron2">
+
+  <script>
+    // Rainbow gradient animation
+    const header = document.getElementById('header-container');
+    const colors = ['#ff7f7f','#ffbf7f','#ffff7f','#7fff7f','#7fbfff','#7f7fff'];
+    let idx = 0;
+    setInterval(() => {
+      header.style.backgroundImage = `linear-gradient(to right, ${colors[idx]}, ${colors[(idx+1)%colors.length]})`;
+      idx = (idx + 1) % colors.length;
+    }, 3000);
+
+    // Reveal fact boxes
+    function revealFacts() {
+      document.querySelectorAll('.neuro-fact').forEach(fact => {
+        const top = fact.getBoundingClientRect().top;
+        if (top < window.innerHeight * 0.75) fact.classList.add('visible');
+        else if (top > window.innerHeight) fact.classList.remove('visible');
+      });
+    }
+    window.addEventListener('scroll', revealFacts);
+    window.addEventListener('load', revealFacts);
+
+    // Reveal floating images
+    function revealImages() {
+      document.querySelectorAll('.floating-image').forEach(img => {
+        const top = img.getBoundingClientRect().top;
+        if (top < window.innerHeight * 0.85 && top > -img.offsetHeight/2) img.classList.add('visible');
+        else img.classList.remove('visible');
+      });
+    }
+    window.addEventListener('scroll', revealImages);
+    window.addEventListener('load', revealImages);
+
+    // Play/Pause & Progress logic
+    let currentAudio = null;
+    document.querySelectorAll('.episode-item').forEach(item => {
+      const btn = item.querySelector('.play-button');
+      const audio = item.querySelector('audio');
+      const progress = document.createElement('input');
+      progress.type = 'range'; progress.min = 0; progress.value = 0; progress.className = 'audio-progress';
+      item.appendChild(progress);
+      btn.addEventListener('click', () => {
+        if (currentAudio && currentAudio !== audio) {
+          currentAudio.pause();
+          currentAudio.parentNode.querySelector('.play-button').textContent = 'Play';
+        }
+        if (audio.paused) {
+          audio.play(); btn.textContent = 'Pause'; currentAudio = audio;
+        } else { audio.pause(); btn.textContent = 'Play'; }
+      });
+      audio.addEventListener('timeupdate', () => {
+        if (!isNaN(audio.duration)) { progress.max = audio.duration; progress.value = audio.currentTime; }
+      });
+      progress.addEventListener('input', () => audio.currentTime = progress.value);
+      audio.addEventListener('ended', () => { btn.textContent = 'Play'; progress.value = 0; });
+    });
+
+    // Open transcript in new tab
+    document.querySelectorAll('.transcript-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.open(btn.dataset.transcript, '_blank');
+      });
+    });
+  </script>
+</body>
+</html>
